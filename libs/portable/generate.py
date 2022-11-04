@@ -15,7 +15,7 @@ encoding = 'utf-8'
 
 
 def generate_md5_table(folder: str) -> dict:
-    res: dict = dict()
+    res: dict = {}
     curdir = os.curdir
     os.chdir(folder)
     for root, _, files in os.walk('.'):
@@ -39,7 +39,7 @@ def write_metadata(md5_table: dict, output_folder: str, exe: str):
     output_path = os.path.join(output_folder, "data.bin")
     with open(output_path, "wb") as f:
         f.write("rustdesk".encode(encoding=encoding))
-        for path in md5_table.keys():
+        for path in md5_table:
             (compressed_data, md5_code) = md5_table[path]
             data_length = len(compressed_data)
             path = path.encode(encoding=encoding)
@@ -81,8 +81,8 @@ if __name__ == '__main__':
     if not exe.startswith(os.path.abspath(folder)):
         print("the executable must locate in source folder")
         exit(-1)
-    exe = '.' + exe[len(os.path.abspath(folder)):]
-    print("executable path: " + exe)
+    exe = f'.{exe[len(os.path.abspath(folder)):]}'
+    print(f"executable path: {exe}")
     md5_table = generate_md5_table(folder)
     write_metadata(md5_table, output_folder, exe)
     build_portable(output_folder)

@@ -6,8 +6,8 @@ import sys
 import csv
     
 def get_lang(lang): 
-  out = {}    
-  for ln in open('./src/lang/%s.rs'%lang):
+  out = {}
+  for ln in open(f'./src/lang/{lang}.rs'):
     ln = ln.strip()
     if ln.startswith('("'):
       k, v = line_split(ln)
@@ -33,50 +33,42 @@ def main():
 
 def expand():
   for fn in glob.glob('./src/lang/*'): 
-    lang = os.path.basename(fn)[:-3] 
-    if lang in ['en','cn']: continue  
+    lang = os.path.basename(fn)[:-3]
+    if lang in ['en','cn']: continue
     dict = get_lang(lang)
-    fw = open("./src/lang/%s.rs"%lang, "wt")
-    for line in open('./src/lang/cn.rs'):
-      line_strip = line.strip()
-      if line_strip.startswith('("'):
-        k, v = line_split(line_strip)
-        if k in dict:
-          line = line.replace(v, dict[k])
-        else:
-          line = line.replace(v, "")
+    with open(f"./src/lang/{lang}.rs", "wt") as fw:
+      for line in open('./src/lang/cn.rs'):
+        line_strip = line.strip()
+        if line_strip.startswith('("'):
+          k, v = line_split(line_strip)
+          line = line.replace(v, dict[k]) if k in dict else line.replace(v, "")
         fw.write(line)
-      else:
-        fw.write(line)
-    fw.close()
  
 
 def to_csv():
   for fn in glob.glob('./src/lang/*.rs'): 
-    lang = os.path.basename(fn)[:-3] 
-    csvfile = open('./src/lang/%s.csv'%lang, "wt")
-    csvwriter = csv.writer(csvfile)
-    for line in open(fn):
-      line_strip = line.strip()
-      if line_strip.startswith('("'):
-        k, v = line_split(line_strip)
-        csvwriter.writerow([k, v])
-    csvfile.close()
+    lang = os.path.basename(fn)[:-3]
+    with open(f'./src/lang/{lang}.csv', "wt") as csvfile:
+      csvwriter = csv.writer(csvfile)
+      for line in open(fn):
+        line_strip = line.strip()
+        if line_strip.startswith('("'):
+          k, v = line_split(line_strip)
+          csvwriter.writerow([k, v])
 
 
 def to_rs(lang):
-  csvfile = open('%s.csv'%lang, "rt")
-  fw = open("./src/lang/%s.rs"%lang, "wt")
-  fw.write('''lazy_static::lazy_static! {
+  csvfile = open(f'{lang}.csv', "rt")
+  with open(f"./src/lang/{lang}.rs", "wt") as fw:
+    fw.write('''lazy_static::lazy_static! {
 pub static ref T: std::collections::HashMap<&'static str, &'static str> =
     [
 ''')
-  for row in csv.reader(csvfile):
-    fw.write('        ("%s", "%s"),\n'%(row[0].replace('"', '\"'), row[1].replace('"', '\"')))
-  fw.write('''    ].iter().cloned().collect();
+    for row in csv.reader(csvfile):
+      fw.write('        ("%s", "%s"),\n'%(row[0].replace('"', '\"'), row[1].replace('"', '\"')))
+    fw.write('''    ].iter().cloned().collect();
 }
 ''')
-  fw.close()
 
 
 main()

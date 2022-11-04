@@ -36,18 +36,21 @@ cm = open('src/ui/cm.html').read() \
 def compress(s):
     s = s.replace("\r\n", "\n")
     x = bytes(s, encoding='utf-8')
-    return '&[u8; ' + str(len(x)) + '] = b"' + str(x)[2:-1].replace(r"\'", "'").replace(r'"',
-                                                                                  r'\"') + '"'
+    return (
+        f'&[u8; {len(x)}'
+        + '] = b"'
+        + str(x)[2:-1].replace(r"\'", "'").replace(r'"', r'\"')
+    ) + '"'
 
 
 with open('src/ui/inline.rs', 'wt') as fh:
-    fh.write('const _COMMON_CSS: ' + compress(strip(common_css)) + ';\n')
-    fh.write('const _COMMON_TIS: ' + compress(strip(common_tis)) + ';\n')
-    fh.write('const _INDEX: ' + compress(strip(index)) + ';\n')
-    fh.write('const _REMOTE: ' + compress(strip(remote)) + ';\n')
-    fh.write('const _CHATBOX: ' + compress(strip(chatbox)) + ';\n')
-    fh.write('const _INSTALL: ' + compress(strip(install)) + ';\n')
-    fh.write('const _CONNECTION_MANAGER: ' + compress(strip(cm)) + ';\n')
+    fh.write(f'const _COMMON_CSS: {compress(strip(common_css))}' + ';\n')
+    fh.write(f'const _COMMON_TIS: {compress(strip(common_tis))}' + ';\n')
+    fh.write(f'const _INDEX: {compress(strip(index))}' + ';\n')
+    fh.write(f'const _REMOTE: {compress(strip(remote))}' + ';\n')
+    fh.write(f'const _CHATBOX: {compress(strip(chatbox))}' + ';\n')
+    fh.write(f'const _INSTALL: {compress(strip(install))}' + ';\n')
+    fh.write(f'const _CONNECTION_MANAGER: {compress(strip(cm))}' + ';\n')
     fh.write('''
 fn get(data: &[u8]) -> String {
     String::from_utf8_lossy(data).to_string()

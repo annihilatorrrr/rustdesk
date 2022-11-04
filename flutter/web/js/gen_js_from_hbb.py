@@ -6,9 +6,7 @@ import glob
 from tabnanny import check
 
 def pad_start(s, n, c = ' '):
-   if len(s) >= n:
-      return s
-   return c * (n - len(s)) + s
+   return s if len(s) >= n else c * (n - len(s)) + s
 
 def safe_unicode(s):
    res = ""
@@ -68,7 +66,7 @@ def main():
    print('}')
    for ln in open('../../../Cargo.toml', encoding='utf-8'):
       if ln.startswith('version ='):
-         print('export const ' + ln)
+         print(f'export const {ln}')
       
 
 def removeComment(ln):
